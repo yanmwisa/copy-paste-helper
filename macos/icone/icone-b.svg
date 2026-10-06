@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!-- Variante B · Bleu ardoise — fond transparent -->
+  <rect x="300" y="248" width="360" height="440" rx="52" fill="#bcd6f0"/>
+  <rect x="404" y="352" width="360" height="440" rx="52" fill="#1f6fb2"/>
+  <g stroke="#ffffff" stroke-width="30" stroke-linecap="round">
+    <line x1="484" y1="470" x2="684" y2="470"/>
+    <line x1="484" y1="560" x2="684" y2="560"/>
+    <line x1="484" y1="650" x2="604" y2="650"/>
+  </g>
+</svg>

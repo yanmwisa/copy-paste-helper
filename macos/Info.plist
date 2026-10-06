@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleName</key>              <string>CopieRapide</string>
+    <key>CFBundleDisplayName</key>       <string>CopieRapide</string>
+    <key>CFBundleExecutable</key>        <string>CopieRapide</string>
+    <key>CFBundleIdentifier</key>        <string>io.github.yanmwisa.copierapide</string>
+    <key>CFBundleVersion</key>           <string>1.0</string>
+    <key>CFBundleShortVersionString</key><string>1.0</string>
+    <key>CFBundlePackageType</key>       <string>APPL</string>
+    <key>LSMinimumSystemVersion</key>    <string>13.0</string>
+    <key>CFBundleIconFile</key>          <string>CopieRapide</string>
+    <key>LSUIElement</key>               <true/>
+    <key>NSAppleEventsUsageDescription</key>
+    <string>To copy, cut, paste and move to the Trash the files and folders you select in the Finder.</string>
+    <key>NSHumanReadableCopyright</key>  <string>Copyright (c) 2026 Yannick (yanmwisa). MIT License. No network connection.</string>
+</dict>
+</plist>

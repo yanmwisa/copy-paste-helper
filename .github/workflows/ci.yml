@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  userscript:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check the userscript syntax
+        run: node --check userscript/copy-paste-helper.user.js
+      - name: The userscript makes no network request
+        run: |
+          if grep -v -E '^\s*(//|\*|/\*)' userscript/copy-paste-helper.user.js \
+              | grep -n -E 'fetch\(|XMLHttpRequest|GM_xmlhttpRequest|WebSocket|sendBeacon|EventSource'; then
+            echo "A network call was found in the userscript."
+            exit 1
+          fi
+
+  macos:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build the app (ad hoc signature, no install)
+        run: cd macos && ./construire.sh
+      - name: No networking library is linked
+        run: |
+          if otool -L macos/CopieRapide.app/Contents/MacOS/CopieRapide | grep -i -E 'CFNetwork|Network\.framework'; then
+            echo "A networking library is linked into the app."
+            exit 1
+          fi

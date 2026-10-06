@@ -1,0 +1,8 @@
+# Build products, rebuilt by macos/construire.sh
+macos/CopieRapide
+macos/CopieRapide.app/
+
+# Backups and macOS metadata (created by exFAT drives and Finder)
+*.bak-*
+.DS_Store
+._*
