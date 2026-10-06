@@ -13,7 +13,13 @@ This repository has two parts, for different needs:
 
 There is **no native Windows app**. On Windows, the userscript is the way to use it, and only inside the browser. A native Windows version would be a welcome contribution.
 
-<!-- TODO before publishing: add a short GIF of the bar in action in docs/images/ and show it here. -->
+![A sentence is selected and a small bar offers Copy. A click in an empty field offers Paste, which inserts the sentence. A whole field is selected and the bar offers Copy, Cut and Delete.](docs/images/demo.gif)
+
+| Copy from a page | Paste into a field | Cut, copy or delete in a field |
+| --- | --- | --- |
+| ![The bar offers Copy next to a selected sentence](docs/images/copy-from-page.png) | ![The bar offers Paste in an empty search field](docs/images/paste-into-field.png) | ![The bar offers Copy, Cut and Delete over a selected reply](docs/images/cut-in-field.png) |
+
+*The userscript, as published, in a browser.*
 
 ## Userscript (Windows and macOS)
 
