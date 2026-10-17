@@ -155,23 +155,72 @@ enum Selection {
         "AXList", "AXCell", "AXGroup", "AXSplitGroup"
     ]
 
+    private static let rolesDeSaisie: Set<String> = [
+        kAXTextFieldRole as String, kAXTextAreaRole as String, kAXComboBoxRole as String, "AXSearchField"
+    ]
+
+    private static func role(_ element: AXUIElement) -> String {
+        var valeur: CFTypeRef?
+        guard AXUIElementCopyAttributeValue(element, kAXRoleAttribute as CFString, &valeur) == .success,
+              let nom = valeur as? String else { return "" }
+        return nom
+    }
+
+    private static func valeurModifiable(_ element: AXUIElement) -> Bool {
+        var modifiable: DarwinBoolean = false
+        return AXUIElementIsAttributeSettable(element, kAXValueAttribute as CFString,
+                                              &modifiable) == .success && modifiable.boolValue
+    }
+
+    /// Tolérante : sert à Cut et Delete quand du texte est déjà sélectionné.
     static func zoneModifiable() -> Bool {
         guard let cible = elementFocalise() else { return true }
-        var role: CFTypeRef?
-        var nom = ""
-        if AXUIElementCopyAttributeValue(cible, kAXRoleAttribute as CFString, &role) == .success,
-           let r = role as? String { nom = r }
-
-        let saisie: Set<String> = [kAXTextFieldRole as String, kAXTextAreaRole as String,
-                                   kAXComboBoxRole as String, "AXSearchField"]
-        if saisie.contains(nom) { return true }
-
-        var modifiable: DarwinBoolean = false
-        if AXUIElementIsAttributeSettable(cible, kAXValueAttribute as CFString,
-                                          &modifiable) == .success, modifiable.boolValue {
-            return true
-        }
+        let nom = role(cible)
+        if rolesDeSaisie.contains(nom) || valeurModifiable(cible) { return true }
         return !nonEditables.contains(nom)
+    }
+
+    /// Stricte : un simple clic ne propose Paste que dans un vrai champ de
+    /// saisie. Le champ doit se trouver sous le curseur ET avoir le focus,
+    /// car un clic sur le fond d'une fenêtre laisse souvent le focus au
+    /// dernier champ utilisé. On part de l'élément sous le curseur : les
+    /// apps Chromium (Chrome, Brave, Claude…) ne donnent pas le focus à
+    /// l'échelle du système, mais marquent le champ lui-même.
+    static func champDeSaisie(sous point: NSPoint) -> Bool {
+        guard var element = elementSous(point) else { return false }
+        let focusSysteme = elementFocalise()
+        // Dans une page web, le clic touche souvent un texte enfant du champ.
+        for _ in 0..<8 {
+            let estChamp = rolesDeSaisie.contains(role(element)) || valeurModifiable(element)
+            if estChamp && aLeFocus(element, focusSysteme: focusSysteme) { return true }
+            guard let parent = parent(de: element) else { return false }
+            element = parent
+        }
+        return false
+    }
+
+    private static func aLeFocus(_ element: AXUIElement, focusSysteme: AXUIElement?) -> Bool {
+        if let focus = focusSysteme, CFEqual(element, focus) { return true }
+        var valeur: CFTypeRef?
+        return AXUIElementCopyAttributeValue(element, kAXFocusedAttribute as CFString, &valeur) == .success
+            && (valeur as? Bool) == true
+    }
+
+    private static func elementSous(_ point: NSPoint) -> AXUIElement? {
+        // L'Accessibilité compte y depuis le haut de l'écran principal.
+        guard let hauteur = NSScreen.screens.first?.frame.height else { return nil }
+        var element: AXUIElement?
+        guard AXUIElementCopyElementAtPosition(AXUIElementCreateSystemWide(), Float(point.x),
+                                               Float(hauteur - point.y), &element) == .success
+        else { return nil }
+        return element
+    }
+
+    private static func parent(de element: AXUIElement) -> AXUIElement? {
+        var valeur: CFTypeRef?
+        guard AXUIElementCopyAttributeValue(element, kAXParentAttribute as CFString, &valeur) == .success,
+              let p = valeur else { return nil }
+        return (p as! AXUIElement)
     }
 
     static func demanderCopie()   { envoyer(0x08, cmd: true) }   // Cmd+C
@@ -1123,7 +1172,7 @@ final class Delegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         guard riche || !Historique.lire().isEmpty else { barre.masquer(); return }
 
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.14) { [weak self] in
-            guard let s = self, Selection.zoneModifiable() else { self?.barre.masquer(); return }
+            guard let s = self, Selection.champDeSaisie(sous: position) else { self?.barre.masquer(); return }
 
             var actions: [Barre.Action] = [
                 .init(titre: "Paste", image: Icone.paste(14), teinte: s.BLEU) { [weak s] in
